@@ -1,0 +1,37 @@
+---
+layout: post
+title:  "SSCLI GC: Implementation notes"
+date:   2005-8-11 14:43:50
+tags: programming sscli vm gc
+categories: notes
+---
+
+- All threads running managed code are suspended (after bringing it to a "GC safe" place.)
+- One or more generations are condemned.
+- Liveliness trace is used to distinguish live from dead objects in:
+ - Gen 0 alone for ephemeral collection.
+ - Gen 0 + 1 for full collection.
+- If ephemeral collection (copying collection):
+    - Live ephemeral objects are promoted into the elder generation by copying.
+        - Live objects are located using a recursive scan.
+            - Elder generation and large-object heap are scanned first for references pointing into ephemeral generation. Such objects are marked as being live (card table.)
+            - The stack of each managed thread is traced to find roots. Interior pointers are also traced.
+            - Handle table is traced for references to objects in the ephemeral generation.
+            - The finalization queue is traced for references to objects in the ephemeral generation.
+        - Live objects are copied into the elder generation.
+        - References to copied objects are updated to reflect their new locations.
+- If full collection (ephemeral + mark and sweep collection (Gen 1)):
+    - Ephemeral collection is done first.
+    - Live objects in Gen 1 are traced:
+        - Cross generational references (i.e. the Gen 0 objects that are pointed to by a Gen 1 object reference) are not visited because they already have their mark bit set (as a result of ephemeral collection.)
+            - Stack references are traced.
+            - Handle table references are traced.
+            - Finalization queue is scanned for references to objects in Gen 1.
+    - Sweep of the elder generation for dead objects:
+        - Mark and pin bits of live objects are cleared.
+        - Dead objects are linked together (if contiguous) into a free list. [^1]
+        - The brick table is cleared to reflect the disappearance of dead objects.
+- Weak reference fix up and building finalizer queue follow.
+
+[^1]: There is no compaction. Dead objects that lie next to each other are treated as one dead zone in the free list.
+

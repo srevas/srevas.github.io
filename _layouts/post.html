@@ -1,0 +1,29 @@
+---
+layout: default
+---
+<h2>{{ page.title }}</h2>
+<p class="byline">
+  {{ page.date | date: "%b %-d, %Y" }}{% if page.author %} • {{ page.author }}{% endif %}{% if page.meta %} • {{ page.meta }}{% endif %}<br />
+  tags: 
+  {% for tag in page.tags %}
+  {{ tag }}
+  {% endfor %}
+</p>
+<p><a href="https://twitter.com/share" class="twitter-share-button" data-via="ksrenev">Tweet</a></p>
+{{ content }}
+
+<!-- Google+ -->
+<!-- <br /> -->
+<!-- <h3>Comments</h3> -->
+<!-- <div id="comments" style="max-height: 300px;"> -->
+<!-- </div> -->
+<!-- <script src="https://apis.google.com/js/plusone.js"></script> -->
+<!-- <div id="comments"></div> -->
+<!-- <script> -->
+<!-- gapi.comments.render('comments', { -->
+<!--     href: window.location, -->
+<!--     width: '700', -->
+<!--     first_party_property: 'BLOGGER', -->
+<!--     view_type: 'FILTERED_POSTMOD' -->
+<!-- }); -->
+<!-- </script> -->

@@ -1,0 +1,287 @@
+---
+layout: post
+title:  "jmp mscoree!_CorExeMain"
+date:   2007-12-25 08:48:01
+tags:   programming sscli vm runtime
+categories: notes
+---
+
+Recently, one of the many technical conversations with a friend
+drifted to how the CLR gets loaded into a process. Developers looking
+at .NET for the first time are often perplexed by how much a managed
+assembly resembles a native binary from the outside and yet how the
+CLR, seemingly magically, takes control over its execution at runtime, and he was
+no exception. The details are interesting enough that I thought I’d
+write it up.
+
+First, some background. Every binary (EXE or DLL) designates an address in its code section as
+being its entry point (Yes, even DLLs have an entrypoint). This is the address the kernel
+transfers control to when the binary is executed (EXE) or gets loaded
+(DLL). While overridable, the entry point for applications
+written in C/C++ and compiled by the Visual C++ toolchain is set to (w)mainCRTStartup or
+(w)WinMainCRTStartup depending on the sub-system, by the linker, by
+default. This is LibC's startup routine which does all the
+initialization (like TLS etc.).
+
+To check this, set a break point in main and look at the call stack of
+an application written in C/C++: 
+
+{% highlight text linenos %}
+ChildEBP RetAddr
+0012ff50 00401fbb iat!wmain
+0012ffa0 77183833 iat!__tmainCRTStartup+0x15e
+0012ffac 778ba9bd kernel32!BaseThreadInitThunk+0xe
+0012ffec 00000000 ntdll!_RtlUserThreadStart+0x23
+{% endhighlight %}
+
+A similar examination for a managed binary would illustrate how the CLR
+gets loaded into the process. In Windbg, open a managed executable
+(File->Open Executable). ntdll!LdrpInitializeProcess notices that the
+process is being debugged and hence breaks into the debugger. Now is a
+good time to take note of a few things.
+
+Here’s what Windbg says:
+
+{% highlight text linenos %}
+ModLoad: 01100000 01108000   image01100000 
+ModLoad: 77880000 7799e000   ntdll.dll 
+ModLoad: 79000000 79045000   C:\Windows\system32\mscoree.dll 
+ModLoad: 77140000 77218000   C:\Windows\system32\KERNEL32.dll 
+(123c.1754): Break instruction exception - code 80000003 (first chance) 
+eax=00000000 ebx=00000000 ecx=001efa10 edx=778e0f34 esi=fffffffe edi=77945d14 
+eip=778c2ea8 esp=001efa28 ebp=001efa58 iopl=0         nv up ei pl zr na pe nc 
+cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246 
+ntdll!DbgBreakPoint: 
+778c2ea8 cc              int     3
+{% endhighlight %}
+
+"image01100000" is the name Windbg has given the managed
+EXE. 0x01100000 is the address at which the image got 
+loaded. However there is no mention of the entry point (which is
+contained in one of the PE headers (called the optional header)). Given
+that this binary is mapped, memory could be dumped, headers
+disassembled to get to the entry point. However that would be
+extremely cumbersome, especially when a tool can do the same
+thing. Enter dumpbin. Dumpbin as its name suggests is a tool that
+dumps the data contained within a PE.
+
+Here is a partial dump of "dumpbin /HEADERS test.exe"
+
+{% highlight text linenos %}
+...
+FILE HEADER VALUES 
+             14C machine (x86) 
+               3 number of sections 
+        476D839B time date stamp Sun Dec 23 03:07:31 2007 
+               0 file pointer to symbol table 
+               0 number of symbols 
+              E0 size of optional header 
+             10E characteristics 
+                   Executable 
+                   Line numbers stripped 
+                   Symbols stripped 
+                   32 bit word machine 
+ 
+OPTIONAL HEADER VALUES 
+             10B magic # (PE32) 
+            8.00 linker version 
+             400 size of code 
+             600 size of initialized data 
+               0 size of uninitialized data 
+            22EE entry point (004022EE) 
+            2000 base of code 
+            4000 base of data 
+          400000 image base (00400000 to 00407FFF) 
+            2000 section alignment 
+             200 file alignment 
+            4.00 operating system version 
+            0.00 image version 
+            4.00 subsystem version 
+...
+{% endhighlight %}
+
+Dumpbin says the entry point of this EXE is at RVA 22EE (line 21). An RVA (which
+stands for Relative Virtual Address) is not an address. It
+is the offset from the base of the binary. Windbg's output already
+indicated that 0x01100000 is the address at which the binary got
+loaded. Thus the entry point is 0x01100000 + 0x22EE ==
+0x011022EE. (Note: dumpbin lists the image’s preferred base address as
+being 0x400000 however that was not where it got loaded. EXEs usually
+get loaded at their preferred base address, not in this case though,
+due to [ASLR](http://www.microsoft.com/technet/technetmag/issues/2007/04/VistaKernel/default.aspx). Now
+set a breakpoint at 0x011022ee and let the application execute.
+When the breakpoint is hit, here’s what Windbg says:</p>
+
+{% highlight text linenos %}
+0:000> bp 0x011022ee 
+0:000> g 
+Breakpoint 0 hit 
+eax=77183821 ebx=7ffdf000 ecx=00000000 edx=011022ee esi=00000000 edi=00000000 
+eip=011022ee esp=001efeb4 ebp=001efebc iopl=0         nv up ei pl zr na pe nc 
+cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246 
+image01100000+0x22ee: 
+011022ee ff2500201001    jmp     dword ptr [image01100000+0x2000 (01102000)]
+{% endhighlight %}
+
+The code at 0x011022ee is a jmp instruction, the target of which is the
+address found at 0x01102000. Usually an indirection in a jmp/call
+target could mean, amongst other things, a dynamically imported entry
+point. Let's now get back to dumpbin to check if that is the case.
+
+"dumpbin /IMPORTS test.exe" dumps the following information:
+
+{% highlight text linenos %}
+Section contains the following imports: 
+ 
+    mscoree.dll 
+                402000 Import Address Table 
+                4022BC Import Name Table 
+                     0 time date stamp 
+                     0 Index of first forwarder reference 
+ 
+                    0 _CorExeMain
+{% endhighlight %}
+
+The listing says the "Import Address Table" resides at RVA 0x2000
+(Note: the dumpbin listing shows the address calculated using the
+module’s preferred base address: 0x400000). Let's now take a quick
+detour to understand how dynamic linking works in Windows and for
+that, examine the code the compiler generates under the following
+circumstances: 
+
+### Calling a function implemented in the same binary
+
+{% highlight c linenos %}
+// test.c 
+void a(void) { } 
+void b(void) { a(); }
+{% endhighlight %}
+
+{% highlight nasm linenos %}
+;; test.asm 
+PUBLIC _a 
+_TEXT SEGMENT 
+_a PROC 
+ push ebp 
+ mov ebp, esp 
+ pop ebp 
+ ret 0 
+_a ENDP 
+_TEXT ENDS 
+
+PUBLIC _b 
+_TEXT SEGMENT 
+_b PROC 
+ push ebp 
+ mov ebp, esp 
+ call _a
+ pop ebp 
+ ret 0 
+_b ENDP 
+_TEXT ENDS 
+END
+{% endhighlight %}
+
+###  Calling a function exported by a DLL
+
+{% highlight c linenos %}
+// test.c 
+__declspec(dllimport) void a(void); 
+void b(void) { a(); }
+{% endhighlight %}
+
+{% highlight nasm linenos %}
+;; test.asm 
+PUBLIC _b 
+EXTRN __imp__a@0:PROC 
+_TEXT SEGMENT 
+_b PROC 
+ push ebp 
+ mov ebp, esp 
+ call DWORD PTR __imp__a@0
+ pop ebp 
+ ret 0 
+_b ENDP 
+_TEXT ENDS 
+END
+{% endhighlight %}
+
+
+Line 17 and Line 8 from the two listings explain the difference in the code that gets
+generated. "call _a" means call the function whose address is
+_a. "call DWORD PTR \_\_imp\_\_a@0” means call the function whose address
+is the first DWORD  at address \_\_imp\_\_a@0.(\_a and \_\_imp\_\_a@0 are
+resolved by the linker). When calling a function exported by
+a DLL, the compiler inserts an indirection because it does not know
+where the function’s code resides in memory.
+
+### The Import Address Table (IAT)
+
+The Import Address Table is an array of function pointers per binary that contains as many slots as
+there are imported functions from other DLLs. Each of these slot's
+address is what is shown as an \_\_imp\_\_* symbol in the assembly
+listing. At runtime, the loader populates this array with actual
+function pointers lazily, as DLLs get loaded.
+
+Armed with this knowledge, let's examine the jmp instruction
+again. The dumpbin listing showed that the target of the jmp
+instruction was the first entry in the IAT. Let's see what that is:
+
+{% highlight text linenos %}
+0:000> dd 0x01102000 
+01102000  79003a6c 00000000 00000048 00050002 
+01102010  0000205c 00000238 00000001 06000001 
+01102020  00000000 00000000 00000000 00000000 
+01102030  00000000 00000000 00000000 00000000 
+01102040  00000000 00000000 00000000 00000000 
+01102050  1e2a000a 00032802 002a0a00 424a5342 
+01102060  00010001 00000000 0000000c 302e3276 
+01102070  3730352e 00003732 00050000 0000006c
+{% endhighlight %}
+
+Dumping the first few DWORDS starting 0x01102000 shows us that the
+first DWORD (the target of the jmp instruction) is 0x79003a6c, which
+when disassembled shows mscoree!_CorExeMain:
+
+{% highlight nasm linenos %}
+;; mscoree!_CorExeMain: 
+79003a6c 55              push    ebp 
+79003a6d 8bec            mov     ebp,esp 
+79003a6f 51              push    ecx 
+79003a70 56              push    esi 
+79003a71 6a00            push    0 
+79003a73 8d45fc          lea     eax,[ebp-4] 
+79003a76 50              push    eax 
+79003a77 6a01            push    1 
+79003a79 e8ef000000      call    mscoree!GetInstallation (79003b6d) 
+79003a7e 8bf0            mov     esi,eax 
+79003a80 85f6            test    esi,esi 
+79003a82 0f8c61610100    jl      mscoree!_CorExeMain+0x33 (79019be9) 
+79003a88 68a43a0079      push    offset mscoree!`string' (79003aa4) 
+79003a8d ff75fc          push    dword ptr [ebp-4] 
+79003a90 ff1520100079    call    dword ptr [mscoree!_imp__GetProcAddress (79001020)] 
+79003a96 85c0            test    eax,eax 
+79003a98 0f8444610100    je      mscoree!_CorExeMain+0x2f (79019be2) 
+79003a9e ffd0            call    eax 
+79003aa0 5e              pop     esi 
+79003aa1 c9              leave 
+79003aa2 c3              ret 
+79003aa3 90              nop
+{% endhighlight %}
+
+Thus the instruction at the entry point of the managed EXE did nothing
+more than to jump to a function that it imported from
+mscoree.dll, called _CorExeMain. That leads us to the question – what is mscoree.dll? 
+
+Mscoree.dll is the CLR's "start up shim". All it does is to choose a
+specific version of the CLR (amongst the multiple side-by-side
+versions present in the machine) that will execute the assembly. This
+choice is influenced by several factors that are beyond the scope of
+this blog post. _CorExeMain hosts the CLR which executes the managed
+entry point which, it computes from the metadata in the assembly.
+
+That the SSCLI implementation cannot use the same mechanism is worth
+mentioning. Although the PE file format is the same, it is not the
+native file format on all Operating Systems SSCLI supports (read
+FreeBSD). This necessitates "clix.exe" that accomplishes the same
+task on these platforms.

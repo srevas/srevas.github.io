@@ -1,0 +1,164 @@
+---
+layout: default
+title: Kaushik Srenevasan's homepage
+---
+
+<!--
+<div style="padding-right:7px;padding-bottom:7px;">
+  <div class="g-person"
+       data-href="//plus.google.com/u/0/101405692634208308623"
+       data-showcoverphoto="false" data-rel="author"></div>
+</div>
+
+<br />
+-->
+
+<div>
+  <p>
+		I currently lead the effort at <a href="http://twitter.github.io/">Twitter</a>, to scale the
+    <a href="https://git-scm.com/">git SCM</a>. Previously, I helped
+    found and lead the VM / Diagnostics group, where I hacked on the
+    <a href="http://openjdk.java.net/">Hotspot Java VM</a>;
+    Specifically,
+    on <a href="https://speakerdeck.com/kaushik/tracing-and-profiling-java-and-native-applications-in-production">improving
+    its observability</a> and getting it to talk to native Linux
+    tools like <a href="/images/gdb-jvm.png">GDB</a> (<a href="https://github.com/kaushiks/GDB/tree/gdbjit">code</a>) and the
+    <a href="https://perf.wiki.kernel.org/index.php/Main_Page">Perf</a> profiler.
+  </p>
+
+  <p>
+    Formerly worked on
+    the <a href="http://en.wikipedia.org/wiki/Chakra_(JScript_engine)">Chakra
+      Javascript Runtime</a> and
+    the <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/hh448186.aspx">.NET
+      Common Language Runtime (CLR)</a> at Microsoft. Authored
+    Chakra's <a href="http://blogs.msdn.com/b/ie/archive/2012/06/13/advances-in-javascript-performance-in-ie10-and-windows-8.aspx">AMD64
+      optimizing JIT compiler</a> and runtime. I also designed and implemented IE's Javascript
+    <a href="http://blogs.msdn.com/b/ie/archive/2008/09/11/introducing-the-ie8-developer-tools-jscript-profiler.aspx">CPU profiler</a>
+    and its
+    <a href="http://msdn.microsoft.com/en-us/library/cc836486(v=VS.85).aspx">API</a>.
+  </p>
+
+	<p>
+		When I'm not writing code you might find me either <a href="http://soundcloud.com/kaushiks/">writing, mixing
+		and mastering music</a>, playing <a href="https://www.youtube.com/watch?v=36x2ypuh0YU&t=2059s">NBA
+		2k</a> on my Xbox, or, more recently, on my <a href="https://roli.com/products/seaboard-rise-49">ROLI
+		Seaboard</a>, that I'm hoping to use to teach myself how to
+		play <a href="https://en.wikipedia.org/wiki/Carnatic_music">carnatic
+		classical</a>
+		music with. My <a href="http://www.imdb.com/name/nm8582344/">IMDB
+		profile</a> has a partial list of movies I've written the score for.
+	</p>
+
+  <p>
+    If you've found any of the software I've written or content on this
+    website useful, please consider expressing your
+    support and appreciation by donating to a charity I support - <a href="http://www.ahobilamutt.org/us/services/contribute/contribute01.asp">Sri
+      Ahobila Mutt</a>.
+  </p>
+</div>
+
+<h3 id="updates">Updates</h3>
+<p>
+  <ul>
+    {% for update in site.data.updates %}
+    <li><h4>{{ update.timestamp }}<h4></li>
+    <ul>
+      {% for text in update.text %}
+      <li>{{ text }}</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </ul>
+</p>
+
+<h3 id="talks">Recent talks</h3>
+<p>
+  <ul>
+    <li>
+      July 2014, <a href="http://oscon.com">OSCON</a>, Portland, OR, <a href="http://www.oscon.com/oscon2014/public/schedule/detail/34094">Tracing and profiling Java (and native) applications
+	      in Production</a> (<a href="https://speakerdeck.com/kaushik/tracing-and-profiling-java-and-native-applications-in-production">slides</a>).
+      <p>
+	      The ability to understand the behavior of a software system so as to be able to answer questions about its health, while important has always been a challenge for software developers. System tools or language debuggers and profilers tend to be myopic in their scope and cumbersome to understand, setup and use; More so when applied to a distributed system. Specifically, requiring recompilation of software with additional instrumentation, adding a non-trivial performance overhead, and, equally importantly, requiring an elaborate setup renders tools unfit to be used in production.
+      </p>
+      <p>
+	      This talk describes a new, low overhead, full stack tool (based on the Linux perf profiler and infrastructure built into the Hotspot JVM) we’ve built at Twitter to help solve this problem of dynamically profiling and tracing the behavior of the kernel and applications (including managed runtimes like the JVM) in production.
+      </p>
+    </li>
+    <li>
+      November 2013, <a href="https://www.youtube.com/user/TwitterUniversity">Twitter University</a>, San Francisco, CA, Profiling
+      Java in production.
+    </li>
+  </ul>
+</p>
+
+<h3 id="projects">Projects</h3>
+<p>
+  A non-exhaustive list of stuff I've built or worked on over the years:
+  <ul>
+    <li>Source GIT, Twitter's fork of the <a href="http://git-scm.com/">Git distributed version control system.</a></li>
+    <li>TwitterJDK, Twitter's fork of the <a href="http://openjdk.java.net/">OpenJDK.</a></li>
+    <li>Kiji, Twitter's fork of the <a href="https://github.com/ruby/ruby">Ruby VM.</a></li>
+    <li>The AMD64 backend compiler
+    for the <a href="http://blogs.msdn.com/b/ie/archive/2012/06/13/advances-in-javascript-performance-in-ie10-and-windows-8.aspx">Chakra
+    Javascript engine</a> that ships in Internet Explorer 9 and above.</li>
+    <li>Internet Explorer's Javascript <a href="http://blogs.msdn.com/b/ie/archive/2008/09/11/introducing-the-ie8-developer-tools-jscript-profiler.aspx">CPU profiler</a> and it's <a href="http://msdn.microsoft.com/en-us/library/cc836486(v=VS.85).aspx">API</a>.</li>
+    <li><a href="http://msdn.microsoft.com/en-us/library/windows/desktop/hh448186.aspx">NGEN PDB support</a> for the .NET CLR.</li>
+    <li><a href="https://github.com/kaushiks/GDB/tree/gdbjit">GDB</a>.</li>
+  </ul>
+</p>
+
+<h3 id="notes">Notes</h3>
+<p>
+  <ul class="posts">
+    {% for post in site.categories.notes %}
+    <li>
+      <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a><br />
+      <span class="byline">{{ post.date | date: "%b %-d, %Y" }}</span>
+      <div class="post-date">
+        <span class="byline">
+	        tags:
+	        {% for tag in post.tags %}
+	        {{ tag }}
+	        {% endfor %}
+	      </span>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</p>
+
+<p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+
+<h3 id="humor">Humor</h3>
+<p>
+	<ul>
+		<li><a href="https://xkcd.com/">XKCD: A webcomic of romance, sarcasm, math, and language</a>.</li>
+		<li><a href="https://gameofzones.bleacherreport.com/">A game of	zones</a>.</li>
+	</ul>
+</p>
+
+<h3 id="elsewhere">Elsewhere</h3>
+<p>
+  <ul>
+    <li>LinkedIn: kaushiksrenevasan</li>
+    <li>Github: <a href="http://github.com/kaushiks">kaushiks</a></li>
+    <li>Twitter: @<a href="http://twitter.com/ksrenev">ksrenev</a></li>
+    <li>SoundCloud: <a href="http://soundcloud.com/kaushiks">kaushiks</a></li>
+		<li><a href="http://www.imdb.com/name/nm8582344/">IMDB</a>
+  </ul>
+</p>
+
+<h3 id="search">Search</h3>
+<script>
+  (function() {
+    var cx = '012591687007796936205:tkchffdx-3w';
+    var gcse = document.createElement('script');
+    gcse.type = 'text/javascript';
+    gcse.async = true;
+    gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(gcse, s);
+  })();
+</script>
+<gcse:search></gcse:search>

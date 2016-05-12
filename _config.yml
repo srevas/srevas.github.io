@@ -1,0 +1,14 @@
+# Site settings
+title: srevas.net
+author: "Kaushik Srenevasan"
+email: kaushik@srevas.net
+description: "Kaushik Srenevasan's homepage. Systems programming, compilers, virtual machines, music and virtual instruments."
+baseurl: ""
+url: "http://srevas.net"
+
+# Build settings
+# markdown: kramdown
+markdown: redcarpet
+redcarpet:
+  extensions: ["strikethrough", "footnotes"]
+permalink: pretty

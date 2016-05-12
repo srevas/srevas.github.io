@@ -1,0 +1,49 @@
+<head>
+  <title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="{{ site.description }}">
+
+  <!-- Open Graph protocol support. -->
+  <meta property="og:type"  content="website" />
+  <meta property="og:image" content="{{ site.url }}/images/k.jpeg" />
+  {% if page.layout == 'post' %}
+  <meta property="og:title" content="{{ page.title }}" />
+  <meta property="og:url"   content="{{ site.url }}{{ page.url }}" />
+  <meta property="og:description" content="{{ page.content | strip_html | truncatewords: 70 }}">
+  {% else %}
+  <meta property="og:title" content="{{ site.title }}" />
+  <meta property="og:url"   content="{{ site.url }}" />
+  <meta property="og:description" content="{{ site.description }}">
+  {% endif %}
+
+  <!-- Twitter cards support. -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@ksrenev">
+  <meta name="twitter:creator" content="@ksrenev">
+  {% if page.layout == 'post' %}
+  <meta name="twitter:title" content="{{ page.title }}">
+  <meta name="twitter:url" content="{{ site.url }}{{ page.url }}">
+  <meta name="twitter:description" content="{{ page.content | strip_html | truncatewords: 70 }}">
+  {% else %}
+  <meta name="twitter:title" content="{{ site.title }}">
+  <meta name="twitter:url" content="{{ site.url }}">
+  <meta name="twitter:description" content="{{ site.description }}">
+  {% endif %}
+
+  <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+
+  <!-- Custom CSS -->
+  <link href='//fonts.googleapis.com/css?family=PT+Sans:400' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
+
+  <!-- Scripts -->
+  {% include ga.html %}
+  {% include twitter.html %}
+
+  <!-- Google+ -->
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+</head>

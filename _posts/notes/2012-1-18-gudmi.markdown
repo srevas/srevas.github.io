@@ -1,0 +1,115 @@
+---
+layout: post
+title:  "Debugging dynamically generated code in Emacs GUD"
+date:   2012-1-18 21:16:30
+tags:   programming gdb gud jit
+categories: notes
+---
+
+Today was my last working day on the [Javascript runtime](https://en.wikipedia.org/wiki/Chakra_(JScript_engine)) team at
+Microsoft, a company I thought I'd retire from. Seven years ago,
+when I started on the (then) newly formed IE 8 script runtime team, it
+was my first real job, not counting the few months I'd spent at
+Honeywell, porting the [Mono CLR](http://www.mono-project.com/docs/advanced/runtime/) to their proprietary embedded
+platform. Over the years I've had the pleasure to work with and the
+privilege to learn from some of the smartest, most
+accomplished colleagues. I didn't get to go in today to say
+goodbye as it has been snowing here in Redmond, WA for the past couple
+of days. If you are wondering where I'm going with this - since I
+didn't go in today, I spent the time setting up my Linux development
+environment instead, and in this post I'll explain how I fixed one of the first
+stumbling blocks I encountered, in Emacs GUD. 
+
+At Twitter, I'm going to work on the [Hotspot JVM](http://openjdk.java.net/), so I thought I'd
+start with that. Between Debian's [apt-get build-dep](https://wiki.debian.org/Apt) to install
+build dependencies and the exhaustive list of steps in the official
+wiki, it turned out to be really easy to build the OpenJDK from source. I was up and 
+running with a debug build in a few minutes. Next, the debugger -
+GDB. I typically use a debugger from within Emacs, using one of my
+favorite major modes - the [Grand Unified Debugger (or GUD) mode](https://www.gnu.org/software/emacs/manual/html_node/emacs/Debuggers.html#Debuggers). GUD
+is an Emacs based user interface for command line debuggers. On
+Windows, it wraps [CDB](https://msdn.microsoft.com/en-us/library/windows/hardware/ff551063(v=vs.85).aspx) ([cdb-gud.el](http://emacswiki.org/emacs/cdb-gud.el); CDB is the command line version
+of the Windows systems debugger - Windbg) and on Linux, GDB.
+
+This is where I ran into a small problem. GUD-MI's (MI or the [Machine
+Interface](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html) being the line based, machine oriented text interface to
+GDB. GUD uses it instead of trying to parse GDB's output) disassembly buffer
+only works when the frame being debugged has associated debug information. While
+debugging dynamically generated code, it is useful to be able to simply follow
+the program counter. My first instinct was to implement debuginfo
+support in Hotspot using the [GDBJIT API](https://sourceware.org/gdb/onlinedocs/gdb/JIT-Interface.html) that recent versions of GDB
+support. (GDBJIT is GDB's just-in-time compilation interface. If a
+JIT implements the GDBJIT interface, GDB, instead of looking for debug
+information in object files, will talk to the JIT instead to obtain
+it). That however would only solve half the problem as there are often
+small code sequences - stubs, thunks etc., for which we can't. Thus,
+having the disassembly buffer follow $PC would still be useful while
+stepping through dynamically generated, shorter sequences of code
+(like call stubs, inline caches etc.). A quick check revealed that the
+latest GDB (7.4.50.20120122-cvs) follows the program counter in the
+absence of debug information, in its [TUI (C-x-o)](https://sourceware.org/gdb/onlinedocs/gdb/TUI.html) mode but my 
+stable GDB's (7.0.1-debian) behavior was the same as Emacs 23 GUD, in
+that it didn't.
+
+I knew that the fix would be trivial if this was just GUD
+behaving differently. GUD, like other major modes is implemented in
+ELisp. When navigating an unfamiliar, fairly large piece of ELisp, the
+built-in [Emacs Lisp
+debugger](https://www.gnu.org/software/emacs/manual/html_node/elisp/Debugging.html)
+is your friend. It can suspend the Lisp evaluator and examine and/or
+alter application state. It took me a bit to trace through the
+implementation to find the piece of code that handled stepping through
+assembly, but once I did, the fix, as I'd suspected was trivial.
+
+Here's the patch I came up with:
+
+{% highlight diff linenos %}
+=== modified file 'lisp/progmodes/gdb-mi.el'
+--- lisp/progmodes/gdb-mi.el    2012-01-05 09:46:05 +0000
++++ lisp/progmodes/gdb-mi.el    2012-01-24 05:13:10 +0000
+@@ -3259,8 +3259,12 @@
+   (let* ((frame (gdb-current-buffer-frame))
+          (file (bindat-get-field frame 'fullname))
+          (line (bindat-get-field frame 'line)))
+-    (when file
+-      (format "-data-disassemble -f %s -l %s -n -1 -- 0" file line)))
++    (if file
++      (format "-data-disassemble -f %s -l %s -n -1 -- 0" file line)
++    ;; If we're unable to get a file name / line for $PC, simply
++    ;; follow $PC, disassembling the next 10 (x ~15 (on IA) ==
++    ;; 150 bytes) instructions.
++    "-data-disassemble -s $pc -e \"$pc + 150\" -- 0"))
+   gdb-disassembly-handler
+   ;; We update disassembly only after we have actual frame information
+   ;; about all threads, so no there's `update' signal in this list
+@@ -3319,8 +3323,12 @@
+       (gdb-table-add-row table
+                          (list
+                           (bindat-get-field instr 'address)
+-                          (apply #'format "<%s+%s>:"
+-                                 (gdb-get-many-fields instr 'func-name 
+'offset))
++                          (let
++                              ((func-name (bindat-get-field instr 'func-name))
++                               (offset (bindat-get-field instr 'offset)))
++                            (if func-name
++                                (format "<%s+%s>:" func-name offset)
++                              ""))
+                           (bindat-get-field instr 'inst)))
+       (when (string-equal (bindat-get-field instr 'address)
+                           address)
+{% endhighlight %}
+
+Instead of not printing an assembly listing in the absence
+of debug information, my fix was to print N bytes starting at $PC. I
+set N to a 150 bytes, which on x86 might correspond roughly, to 10 instructions.
+That is it. A simple enough patch to get it to work the way GDB and
+other debuggers do. Since this is only really useful while debugging
+code that doesn't have symbols, typically dynamically generated code,
+I suspect this'd be useful to a lot of developers, but I'm going to
+try to upstream it anyway. We'll see how that goes. If it gets in,
+it'd be my first contribution to Emacs.
+
+[Update: This patch [was
+accepted](https://lists.gnu.org/archive/html/emacs-devel/2012-01/msg00753.html)
+and is now a part of the official [distribution](http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=4a07df36a52547d272107151e9251ba96cb37224).]
