@@ -1,2 +1,5 @@
 User-agent: *
 Disallow: /utilities
+
+User-agent: ia_archiver
+Disallow: /

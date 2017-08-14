@@ -15,7 +15,7 @@ research to satisfy my curiosity about how multi dimensional MIDI
 input works.
 
 - The model I bought was the [Seaboard RISE 49](https://www.youtube.com/watch?v=cMdNDyW0dos). The RISE is a [MIDI](https://en.wikipedia.org/wiki/MIDI)
-  controller that transmits MIDI over USB. (It does not have a
+  controller that transmits MIDI over USB. (It does not have an
   in-built sound engine.) One key difference in the way it does that
   however is, that it transmits multiple channels of MIDI
   simultaneously. (See MPE below.)

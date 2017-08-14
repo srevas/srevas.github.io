@@ -1,0 +1,121 @@
+---
+- year: 2017
+  title: Maruvaarthai Pesadhae
+  language: Tamizh
+  production: Maanja Productions
+  productionurl: https://www.facebook.com/maanjaproductions/
+  movie: https://www.facebook.com/maanjaproductions/videos/1358534114255546/
+  credits: Composer and Producer
+- year: 2017
+  title: Sandhai
+  language: Tamizh
+  production: Petromaxx Dreamz
+  productionurl: https://www.facebook.com/petromaxxDreamz/
+  movie: https://www.youtube.com/watch?v=47Bbva0JtPM
+  teaser: https://www.youtube.com/watch?v=XCwFhjrIxOo&feature=youtu.be
+  credits: Composer and Producer
+- year: 2017
+  title: Avanum Naanum
+  language: Tamizh
+  production: Petromaxx Dreamz
+  productionurl: https://www.facebook.com/petromaxxDreamz/
+  movie: https://www.youtube.com/watch?v=hxj8nfSjakA
+  imdb: http://www.imdb.com/title/tt7119944/?ref_=nm_flmg_com_2
+  ost: https://www.youtube.com/playlist?list=PL1eDZORcHSdmSRrhENc4U8vEh5LAoUaR_
+  credits: Composer and Producer<br />Lyrics - Ishwarya R<br />Vocals - Meera Iyer
+- year: 2017
+  title: Edhirnokku
+  language: Tamizh
+  production: Akkarai Productions
+  productionurl: https://www.facebook.com/akkaraiproductions/
+  imdb: http://www.imdb.com/title/tt7017656/?ref_=nm_flmg_com_1
+  credits: Composer and Producer
+- year: 2016
+  title: Vennila
+  language: Tamizh
+  production: Swaram
+  productionurl: http://swaram.org/
+  song: https://www.youtube.com/watch?v=aMCy4u_8qRQ
+  credits: Composer and Producer<br />Lyrics - Ishwarya R<br />Singers - Karthik R, Yamini S<br />Bass - Sai V<br />Djembe - Makesh R<br />Tabla - Ritesh I<br />Mixing and Mastering - Krishna S
+- year: 2016
+  title: Vennila
+  language: Telugu
+  production: Swaram
+  productionurl: http://swaram.org/
+  song: https://www.youtube.com/watch?v=RWyyup0wpvw
+  credits: Composer and Producer<br />Lyrics - Naveen Sunkara<br />Singers - Srinath A, Sumana P<br />Bass - Sai V<br />Djembe - Makesh R<br />Tabla - Ritesh I<br />Mixing and Mastering - Krishna S
+- year: 2016
+  title: Oliver's Tryst
+  language: English
+  production: Petromaxx Dreamz
+  productionurl: https://www.facebook.com/petromaxxDreamz/
+  imdb: http://www.imdb.com/title/tt6246074/?ref_=nm_flmg_com_3
+  movie: https://www.youtube.com/watch?v=fn5PM6nSGcs
+  credits: Composer and Producer
+- year: 2016
+  title: Subadan
+  language: Tamizh
+  production: For the love of cinema productions
+  productionurl: https://www.facebook.com/floc.production/
+  imdb: http://www.imdb.com/title/tt7151080/?ref_=nm_flmg_com_4
+  credits: Composer and Producer
+- year: 2016
+  title: Seattle Saaral signature tune
+  language: Tamizh
+  production: Seattle Saaral, Seattle's first tamizh radio station
+  song: https://soundcloud.com/kaushiks/seattle-saaral-radio-signature-tune
+  credits: Composer, Producer, Mix and Mastering engineer
+- year: 2015
+  title: Kanimozhi
+  language: Tamizh
+  production: For the love of cinema productions
+  productionurl: https://www.facebook.com/floc.production/
+  movie: https://www.youtube.com/watch?v=qcYwlWQryKw&list=PLZfLxmkMUedmbtioxptVNspUA1VEpuvWN&index=9
+  credits: Composer and Producer
+- year: 2015
+  title: Thanneer Thanneer
+  language: Tamizh
+  production: Akkarai Productions
+  productionurl: https://www.facebook.com/akkaraiproductions/
+  imdb: http://www.imdb.com/title/tt6802008/?ref_=nm_flmg_com_5
+  movie: https://www.youtube.com/watch?v=xazXon7XMeg
+  credits: Composer and Producer
+- year: 2015
+  title: Thigil Padam
+  language: Tamizh
+  production: For the love of cinema productions
+  productionurl: https://www.facebook.com/floc.production/
+  movie: https://www.youtube.com/watch?v=0BcwBm3QUxY&list=PLZfLxmkMUedn559t15U9ZHmtmWOdclgMe&index=10
+  credits: Composer and Producer
+- year: 2015
+  title: Muran
+  language: Tamizh
+  production: Akkarai Productions
+  productionurl: https://www.facebook.com/akkaraiproductions/
+  imdb: http://www.imdb.com/title/tt6780372/?ref_=nm_flmg_com_6
+  movie: https://www.youtube.com/watch?v=CqWRuUTb8cg
+  credits: Composer and Producer
+- year: 2014
+  title: 24 mani neram
+  language: Tamizh
+  production: Akkarai Productions
+  productionurl: https://www.facebook.com/akkaraiproductions/
+  movie: https://www.youtube.com/watch?v=3leX_FICESo
+  teaser: https://www.youtube.com/watch?v=CdhRwwdCA5Q&feature=youtu.be
+  credits: Composer and Producer
+- year: 2014
+  title: Pagal Kalavu
+  language: Tamizh
+  production: C++ Productions
+  productionurl: https://www.facebook.com/C-Plus-Plus-Productions-323693141086167/
+  ost: https://www.youtube.com/watch?v=4a7KGVWQDjM
+  credits: Mix and Mastering engineer
+- year: 2014
+  title: Pei Kadhai trailer
+  language: Tamizh
+  production: Kaapi Tea Productions
+  productionurl: https://www.facebook.com/KaapiTea/
+  song: https://soundcloud.com/mailvidi/pei-kadhai-theme
+  teaser: https://www.youtube.com/watch?v=vSJ3pco5B0Y
+  credits: Mix and Mastering engineer
+---
